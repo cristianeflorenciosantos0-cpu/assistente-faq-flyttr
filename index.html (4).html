@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Assistente FAQ · FLYTTR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F2F2F2;
+      --surface: #ffffff;
+      --border: #E2E2E2;
+      --shadow: #1A1A1A;
+      --mid: #7A7A7A;
+      --light: #AFAFAF;
+      --honey: #EAAA46;
+      --green: #22C55E;
+      --font: 'Inter', sans-serif;
+    }
+
+    html, body { height: 100%; background: var(--bg); font-family: var(--font); color: var(--shadow); }
+
+    /* ── Nav ── */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 52px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 24px; gap: 8px; z-index: 100;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 8px; margin-right: 12px; }
+    .nav-logo svg { width: 20px; height: 20px; }
+    .nav-brand { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; }
+    .nav-divider { width: 1px; height: 18px; background: var(--border); margin: 0 8px; }
+    .nav-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 500;
+      background: var(--shadow); color: #fff;
+      text-decoration: none;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      height: 100vh;
+      padding-top: 52px;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 16px 14px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-header-top {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 10px;
+    }
+    .sidebar-title { font-size: 12px; font-weight: 600; }
+    .new-chat-btn {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 500; color: var(--mid);
+      cursor: pointer; padding: 4px 8px; border-radius: 5px;
+      border: 1px solid var(--border); background: transparent;
+      font-family: var(--font); transition: all 0.15s;
+    }
+    .new-chat-btn:hover { background: var(--bg); color: var(--shadow); }
+
+    .sidebar-section { padding: 12px 14px 6px; }
+    .section-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--light); margin-bottom: 6px;
+    }
+    .topic-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 8px; border-radius: 6px;
+      font-size: 12px; color: var(--mid);
+      line-height: 1.4; margin-bottom: 1px;
+    }
+    .topic-item { cursor: pointer; }
+    .topic-item:hover { background: var(--bg); color: var(--shadow); }
+    .hint-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--honey); flex-shrink: 0; margin-top: 5px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto; padding: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .status-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--mid); }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); animation: pulse 2.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 3px rgba(34,197,94,0); }
+    }
+
+    /* ── Chat area ── */
+    .chat-area {
+      display: flex; flex-direction: column;
+      background: var(--bg); overflow: hidden;
+    }
+
+    .chat-notice {
+      padding: 8px 20px;
+      background: #FFF8EC;
+      border-bottom: 1px solid #F0D9A8;
+      font-size: 11px; color: #9A7A3A;
+      font-weight: 500; letter-spacing: 0.2px;
+    }
+
+    .chat-messages {
+      flex: 1; overflow-y: auto;
+      padding: 24px 20px; display: flex;
+      flex-direction: column; gap: 16px;
+    }
+
+    .message {
+      display: flex; flex-direction: column; max-width: 72%;
+    }
+    .message.bot { align-self: flex-start; }
+    .message.user { align-self: flex-end; }
+
+    .bubble {
+      padding: 12px 16px; border-radius: 12px;
+      font-size: 13px; line-height: 1.6;
+    }
+    .message.bot .bubble {
+      background: var(--honey); color: var(--shadow);
+      border-bottom-left-radius: 4px;
+    }
+    .message.user .bubble {
+      background: #9A9A9A; color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .typing .bubble {
+      background: var(--honey);
+      display: flex; gap: 5px; align-items: center;
+      padding: 14px 16px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--shadow); opacity: 0.5; animation: blink 1.2s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+
+    /* ── Input ── */
+    .chat-input-area {
+      padding: 16px 20px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex; gap: 10px; align-items: flex-end;
+    }
+    .chat-input {
+      flex: 1; padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px; font-size: 13px;
+      font-family: var(--font); color: var(--shadow);
+      background: var(--bg); resize: none;
+      outline: none; max-height: 120px;
+      transition: border-color 0.15s;
+    }
+    .chat-input:focus { border-color: var(--honey); }
+    .chat-input::placeholder { color: var(--light); }
+    .send-btn {
+      width: 38px; height: 38px; border-radius: 8px;
+      background: #9A9A9A; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .send-btn:hover { background: var(--honey); }
+    .send-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+    /* ── WhatsApp button ── */
+    #support-btn {
+      position: fixed; bottom: 24px; right: 24px;
+      display: flex; align-items: center; gap: 8px;
+      background: #9A9A9A; color: #ffffff;
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      padding: 10px 18px; border-radius: 24px;
+      text-decoration: none;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      transition: all 0.2s; z-index: 200;
+    }
+    #support-btn:hover { background: var(--honey); color: var(--shadow); }
+
+    /* Markdown-like formatting */
+    .bubble strong { font-weight: 600; }
+    .bubble ul, .bubble ol { padding-left: 18px; margin-top: 6px; }
+    .bubble li { margin-bottom: 3px; }
+    .bubble p { margin-bottom: 6px; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .bubble a { color: inherit; text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-logo">
+    <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#1A1A1A" d="M470.26,1079.94l132.65.06c-4-40.54-15.99-444.52-15.99-451.36,0-28.9-18.53-53.9-45.63-66.46h.09S214.54,398.18,88.28,335l-35.9,70.37s279.28,145.28,310.27,161.16c-122.48,2.01-259.51,7.49-362.63,11.06l-.02,61.21s323.71,11.25,363.27,11.53c-3.47,1.77-259.18,105-321.96,131.15l64.81,127.24c37.93-23.85,296.94-184.08,312.76-192.16-45.46,71.22-125.58,223.19-164.51,289.79,0,0,35.25,23.07,35.25,23.07,47.29-64.66,165.07-212.37,206.89-277.69l3.04-4.64c0,12.34-24.09,271.27-29.29,332.85Z"/>
+      <path fill="#1A1A1A" d="M546.88,521.18c4.87,1.71,374.36,171.77,453.2,207.39l19.15-37.52c-68.84-39.48-221.04-134.61-301.32-177.26,12.85.05,302.71,34.89,362.04,42.43l.05-168.82c-45.91,5.8-347.29,42.33-363.45,42.19,104.37-53.96,219.8-114.8,307.11-160.54l-34.78-68.28s-289.55,143.29-327.71,162.66c3.82-5.83,162.49-214.88,200.7-266.04l-107.74-70.51c-20.4,36.76-159.87,285.23-173.56,306.22,1.59-111.31,6.54-238.36,9.88-333.04L486.44,0c4.23,123.6,6.63,444.29,6.63,451.34,0,31.74,22.3,58.83,53.81,69.84Z"/>
+    </svg>
+    <span class="nav-brand">FLYTTR</span>
+  </div>
+  <div class="nav-divider"></div>
+  <a class="nav-pill" href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Assistente FAQ
+  </a>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-header-top">
+        <span class="sidebar-title">Temas disponíveis</span>
+        <button class="new-chat-btn" onclick="resetChat()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Reiniciar
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="section-label">Produto</p>
+      <div class="topic-item" onclick="askTopic('O que é o Aedes do Bem?')"><span class="hint-dot"></span>O que é o Aedes do Bem™</div>
+      <div class="topic-item" onclick="askTopic('Como funciona a Caixa do Bem?')"><span class="hint-dot"></span>Como funciona a Caixa do Bem</div>
+      <div class="topic-item" onclick="askTopic('O mosquito pica humanos?')"><span class="hint-dot"></span>O mosquito pica humanos?</div>
+      <div class="topic-item" onclick="askTopic('O produto é seguro para crianças?')"><span class="hint-dot"></span>O produto é seguro para crianças</div>
+    </div>
+    <div class="sidebar-section">
+      <p class="section-label">Projeto</p>
+      <div class="topic-item" onclick="askTopic('Quais bairros participam do projeto?')"><span class="hint-dot"></span>Bairros participantes</div>
+      <div class="topic-item" onclick="askTopic('Quanto tempo dura o projeto?')"><span class="hint-dot"></span>Duração do projeto</div>
+      <div class="topic-item" onclick="askTopic('Como é a parceria com a prefeitura?')"><span class="hint-dot"></span>Parceria com prefeitura</div>
+    </div>
+    <div class="sidebar-section">
+      <p class="section-label">Instalação</p>
+      <div class="topic-item" onclick="askTopic('Como instalar a Caixa do Bem?')"><span class="hint-dot"></span>Como instalar a Caixa</div>
+      <div class="topic-item" onclick="askTopic('Onde colocar a Caixa do Bem no quintal?')"><span class="hint-dot"></span>Onde colocar no quintal</div>
+      <div class="topic-item" onclick="askTopic('Com que frequência devo repor a Caixa do Bem?')"><span class="hint-dot"></span>Frequência de reposição</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        Assistente online
+      </div>
+    </div>
+  </aside>
+
+  <main class="chat-area">
+    <div class="chat-notice">🔒 Uso interno · Não compartilhe este link</div>
+    <div class="chat-messages" id="messages"></div>
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="input" placeholder="Digite sua dúvida aqui..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </main>
+</div>
+
+<a href="https://wa.me/5519978005476" target="_blank" id="support-btn">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  Falar com atendimento humano
+</a>
+
+<script>
+  const WEBHOOK = 'https://summer-night-4781.cristianeflorencio-santos0.workers.dev/';
+  const sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
+  const messagesEl = document.getElementById('messages');
+  const inputEl = document.getElementById('input');
+
+  // Initial bot message
+  addMessage('bot', 'Olá, sou a Cris da FLYTTR, como posso ajudar? 👋');
+
+  function addMessage(role, text) {
+    const msg = document.createElement('div');
+    msg.className = `message ${role}`;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = formatText(text);
+    msg.appendChild(bubble);
+    messagesEl.appendChild(msg);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return msg;
+  }
+
+  function addTyping() {
+    const msg = document.createElement('div');
+    msg.className = 'message bot typing';
+    msg.id = 'typing';
+    msg.innerHTML = '<div class="bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+    messagesEl.appendChild(msg);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing');
+    if (t) t.remove();
+  }
+
+  function formatText(text) {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+      .replace(/\n/g, '<br>');
+  }
+
+  async function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    inputEl.value = '';
+    inputEl.style.height = 'auto';
+    addMessage('user', text);
+    addTyping();
+
+    try {
+      const res = await fetch(WEBHOOK, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          chatInput: text,
+          sessionId: sessionId,
+          action: 'sendMessage'
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('HTTP ' + res.status);
+      }
+
+      const raw = await res.text();
+      removeTyping();
+      
+      let reply = '';
+      try {
+        // n8n sometimes returns multiple JSON objects separated by newlines
+        const lines = raw.trim().split('\n').filter(l => l.trim());
+        for (const line of lines) {
+          try {
+            const obj = JSON.parse(line);
+            const candidate = obj.output || obj.text || obj.message || obj.response || obj.content;
+            if (candidate) { reply = candidate; break; }
+          } catch(e) {}
+        }
+        if (!reply) {
+          const data = JSON.parse(lines[0]);
+          reply = data.output || data.text || data.message || data.response || data.content || raw;
+        }
+      } catch(e) {
+        reply = raw;
+      }
+      addMessage('bot', reply);
+    } catch (err) {
+      console.error('Erro:', err);
+      removeTyping();
+      addMessage('bot', 'Não consegui conectar ao assistente. Erro: ' + err.message);
+    }
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  function askTopic(text) {
+    inputEl.value = text;
+    sendMessage();
+  }
+
+  function resetChat() {
+    messagesEl.innerHTML = '';
+    addMessage('bot', 'Olá, sou a Cris da FLYTTR, como posso ajudar? 👋');
+  }
+</script>
+
+</body>
+</html>
