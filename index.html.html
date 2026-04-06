@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Assistente FAQ · FLYTTR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F2F2F2;
+      --surface: #ffffff;
+      --border: #E2E2E2;
+      --shadow: #1A1A1A;
+      --mid: #7A7A7A;
+      --light: #AFAFAF;
+      --honey: #EAAA46;
+      --green: #22C55E;
+      --font: 'Inter', sans-serif;
+    }
+
+    html, body { height: 100%; background: var(--bg); font-family: var(--font); color: var(--shadow); }
+
+    .topnav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 8px;
+      z-index: 100;
+    }
+
+    .nav-logo { display: flex; align-items: center; gap: 8px; margin-right: 12px; }
+    .nav-logo svg { width: 20px; height: 20px; }
+
+    .nav-brand {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--shadow);
+    }
+
+    .nav-divider { width: 1px; height: 18px; background: var(--border); margin: 0 8px; }
+
+    .nav-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--mid);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .nav-pill:hover { background: var(--bg); color: var(--shadow); }
+    .nav-pill.active { background: var(--shadow); color: #fff; }
+    .nav-pill svg { width: 13px; height: 13px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      height: 100vh;
+      padding-top: 52px;
+    }
+
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 16px 14px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-title { font-size: 12px; font-weight: 600; color: var(--shadow); }
+
+    .new-chat-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--mid);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: transparent;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .new-chat-btn:hover { background: var(--bg); color: var(--shadow); }
+
+    .search-box {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 12px;
+      font-family: var(--font);
+      color: var(--shadow);
+      outline: none;
+    }
+    .search-box::placeholder { color: var(--light); }
+    .search-box:focus { border-color: var(--honey); }
+
+    .sidebar-section { padding: 12px 14px 6px; }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--light);
+      margin-bottom: 6px;
+    }
+
+    .hint-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 7px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--mid);
+      cursor: pointer;
+      transition: all 0.15s;
+      line-height: 1.4;
+      margin-bottom: 1px;
+    }
+    .hint-item:hover { background: var(--bg); color: var(--shadow); }
+
+    .hint-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--honey);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--mid);
+    }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 3px rgba(34,197,94,0); }
+    }
+
+    .chat-area {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    #n8n-chat-wrap {
+      flex: 1;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    /* Force n8n chat colors */
+    #n8n-chat-wrap .chat-header {
+      background-color: #FFF8EC !important;
+      border-bottom: 1px solid #F0D9A8 !important;
+    }
+    #n8n-chat-wrap .chat-header * {
+      color: #9A7A3A !important;
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.3px !important;
+    }
+    #n8n-chat-wrap .chat-message-from-bot .chat-message-bubble {
+      background-color: #EAAA46 !important;
+      color: #1A1A1A !important;
+    }
+    #n8n-chat-wrap .chat-message-from-user .chat-message-bubble {
+      background-color: #9A9A9A !important;
+      color: #ffffff !important;
+    }
+    #n8n-chat-wrap .chat-input,
+    #n8n-chat-wrap .chat-inputs {
+      background-color: #ffffff !important;
+      border-top: 1px solid #E2E2E2 !important;
+    }
+    #n8n-chat-wrap .chat-input textarea,
+    #n8n-chat-wrap .chat-input input {
+      background: #ffffff !important;
+      color: #1A1A1A !important;
+    }
+    #n8n-chat-wrap .chat-input button,
+    #n8n-chat-wrap button[type="submit"] {
+      background-color: #9A9A9A !important;
+      color: #ffffff !important;
+    }
+    #n8n-chat-wrap button[type="submit"]:hover {
+      background-color: #EAAA46 !important;
+      color: #1A1A1A !important;
+    }
+    #n8n-chat-wrap .chat-footer,
+    #n8n-chat-wrap [class*="footer"],
+    #n8n-chat-wrap [class*="powered"] {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-logo">
+    <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#1A1A1A" d="M470.26,1079.94l132.65.06c-4-40.54-15.99-444.52-15.99-451.36,0-28.9-18.53-53.9-45.63-66.46h.09S214.54,398.18,88.28,335l-35.9,70.37s279.28,145.28,310.27,161.16c-122.48,2.01-259.51,7.49-362.63,11.06l-.02,61.21s323.71,11.25,363.27,11.53c-3.47,1.77-259.18,105-321.96,131.15l64.81,127.24c37.93-23.85,296.94-184.08,312.76-192.16-45.46,71.22-125.58,223.19-164.51,289.79,0,0,35.25,23.07,35.25,23.07,47.29-64.66,165.07-212.37,206.89-277.69l3.04-4.64c0,12.34-24.09,271.27-29.29,332.85Z"/>
+      <path fill="#1A1A1A" d="M546.88,521.18c4.87,1.71,374.36,171.77,453.2,207.39l19.15-37.52c-68.84-39.48-221.04-134.61-301.32-177.26,12.85.05,302.71,34.89,362.04,42.43l.05-168.82c-45.91,5.8-347.29,42.33-363.45,42.19,104.37-53.96,219.8-114.8,307.11-160.54l-34.78-68.28s-289.55,143.29-327.71,162.66c3.82-5.83,162.49-214.88,200.7-266.04l-107.74-70.51c-20.4,36.76-159.87,285.23-173.56,306.22,1.59-111.31,6.54-238.36,9.88-333.04L486.44,0c4.23,123.6,6.63,444.29,6.63,451.34,0,31.74,22.3,58.83,53.81,69.84Z"/>
+    </svg>
+    <span class="nav-brand">FLYTTR</span>
+  </div>
+
+  <div class="nav-divider"></div>
+
+  <a class="nav-pill active" href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Assistente FAQ
+  </a>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-header-top">
+        <span class="sidebar-title">Sugestões</span>
+        <button class="new-chat-btn" onclick="location.reload()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nova conversa
+        </button>
+      </div>
+      <input class="search-box" type="text" placeholder="Buscar pergunta..."/>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="section-label">Perguntas frequentes</p>
+      <div class="hint-item" onclick="sendHint(this)"><span class="hint-dot"></span>O que é o Aedes do Bem™?</div>
+      <div class="hint-item" onclick="sendHint(this)"><span class="hint-dot"></span>Como funciona a Caixa do Bem?</div>
+      <div class="hint-item" onclick="sendHint(this)"><span class="hint-dot"></span>Quais bairros participam do projeto?</div>
+      <div class="hint-item" onclick="sendHint(this)"><span class="hint-dot"></span>Quanto tempo dura o projeto?</div>
+      <div class="hint-item" onclick="sendHint(this)"><span class="hint-dot"></span>O mosquito pica humanos?</div>
+      <div class="hint-item" onclick="sendHint(this)"><span class="hint-dot"></span>O produto é seguro para crianças?</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        Assistente online
+      </div>
+    </div>
+  </aside>
+
+  <main class="chat-area">
+    <div id="n8n-chat-wrap"></div>
+  </main>
+</div>
+
+<script type="module">
+  import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+  createChat({
+    webhookUrl: 'https://cristianesantos.app.n8n.cloud/webhook/e5616171-e3b5-4c39-81d4-67409f9fa60a/chat',
+    target: '#n8n-chat-wrap',
+    mode: 'fullscreen',
+    showWelcomeScreen: false,
+    initialMessages: ['Olá, sou a Cris da FLYTTR, como posso ajudar? 👋'],
+    i18n: {
+      en: {
+        title: '🔒 Uso interno · Não compartilhe este link',
+        subtitle: '',
+        inputPlaceholder: 'Como posso ajudar hoje?',
+        getStarted: 'Iniciar conversa',
+        footer: ''
+      }
+    },
+    theme: {
+      '--chat--color-primary': '#9A9A9A',
+      '--chat--color-primary-shade-50': '#8A8A8A',
+      '--chat--color-primary-shade-100': '#7A7A7A',
+      '--chat--color-secondary': '#9A9A9A',
+      '--chat--color-white': '#ffffff',
+      '--chat--color-light': '#F2F2F2',
+      '--chat--color-light-shade-50': '#E8E5E3',
+      '--chat--color-light-shade-100': '#d2cfcd',
+      '--chat--color-dark': '#9A9A9A',
+      '--chat--color-typing': '#9A9A9A',
+      '--chat--border-radius': '10px',
+      '--chat--header--background': '#9A9A9A',
+      '--chat--header--color': '#ffffff',
+      '--chat--message--bot--background': '#EAAA46',
+      '--chat--message--bot--color': '#1A1A1A',
+      '--chat--message--user--background': '#9A9A9A',
+      '--chat--message--user--color': '#ffffff',
+      '--chat--input--background': '#ffffff',
+      '--chat--input--border-color': '#E2E2E2',
+    }
+  });
+</script>
+
+<script>
+  function sendHint(el) {
+    setTimeout(() => {
+      const input = document.querySelector('#n8n-chat-wrap input[type="text"], #n8n-chat-wrap textarea');
+      if (input) {
+        const text = el.innerText.replace('•', '').trim();
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(input, text);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.focus();
+      }
+    }, 100);
+  }
+</script>
+
+
+<a href="https://wa.me/5519978005476" target="_blank" id="support-btn" title="Falar com atendimento humano">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  Falar com atendimento humano
+</a>
+
+<style>
+#support-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #9A9A9A;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 18px;
+  border-radius: 24px;
+  text-decoration: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  transition: all 0.2s;
+  z-index: 200;
+}
+#support-btn:hover {
+  background: #EAAA46;
+  color: #1A1A1A;
+  box-shadow: 0 4px 16px rgba(234,170,70,0.3);
+}
+</style>
+</body>
+</html>
